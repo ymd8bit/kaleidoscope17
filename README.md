@@ -1,9 +1,8 @@
 # kaleidoscope17
-Kaleidoscope17 is an implementation of Kaleidoscope in LLVM tutorial.
-https://llvm.org/docs/tutorial/index.html
-This project tries to rewrite the original Kaleidoscope with modern C++(17).
+Kaleidoscope17 is an implementation of [Kaleidoscope in LLVM tutorial](https://llvm.org/docs/tutorial/index.html).   
+This project tries to rewrite the original Kaleidoscope with modern C++17.  
 Now, this project only covers until chapter "[2. Kaleidoscope: Implementing a Parser and AST](
-https://llvm.org/docs/tutorial/LangImpl02.html)".
+https://llvm.org/docs/tutorial/LangImpl02.html)".  
 
 ## Requirements
 - LLVM (>= 7.0)
@@ -27,6 +26,5 @@ ninja all
 ctest
 ```
 
-This project is going to require LLVM (not yet), therefore you need to specify the installed directory by setting `CMAKE_PREFIX_PATH` to cmake.
-if you need the detailed, please check the official guide.
-https://llvm.org/docs/CMake.html#embedding-llvm-in-your-project
+This project is going to require LLVM (not yet), therefore you need to specify the installed directory by setting `CMAKE_PREFIX_PATH` to cmake.  
+if you need the detailed, please check [the official guide](https://llvm.org/docs/CMake.html#embedding-llvm-in-your-project).
