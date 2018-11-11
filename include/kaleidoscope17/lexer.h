@@ -10,8 +10,7 @@
 #include <istream>
 #include <map>
 
-namespace kaleidoscope17
-{
+namespace kaleidoscope17 {
 
 class Lexer
 {
@@ -32,28 +31,27 @@ public:
   Token get_token()
   {
     // skip any spaces
-    while (isspace(cur_char_))
-    {
-      get_next_char();
-    };
+    while (isspace(cur_char_) && !is_eof()) { get_next_char(); };
+
+    // check wheather current token is the end of file or not.
+    if (is_eof()) {
+      return {TokenType::Eof, static_cast<char>(EOF)};
+    }
 
     // check wheather current token is an identifier or not.
     // this hits only when the first charactor is alphabet not a number.
-    if (std::isalpha(cur_char_))
-    {
+    if (std::isalpha(cur_char_)) {
       std::string identifier_str{cur_char_};
 
       // get next char that could be a number or an alphabet.
       get_next_char();
-      while (std::isalnum(cur_char_))
-      {
+      while (std::isalnum(cur_char_)) {
         identifier_str += cur_char_;
         get_next_char();
       }
 
       /// check wheather current token is one of the keyword tokens.
-      if (kw_token_map_.count(identifier_str))
-      {
+      if (kw_token_map_.count(identifier_str)) {
         auto token_type = kw_token_map_[identifier_str];
         return {token_type, std::move(identifier_str)};
       }
@@ -62,12 +60,10 @@ public:
 
     // check wheather current token is number of not.
     // This hits the string is a sequence of numbers or decimal point.
-    if (std::isdigit(cur_char_) || cur_char_ == '.')
-    {
+    if (std::isdigit(cur_char_) || cur_char_ == '.') {
       std::string num_str{cur_char_};
       cur_char_ = get_next_char();
-      while (std::isdigit(cur_char_) || cur_char_ == '.')
-      {
+      while (std::isdigit(cur_char_) || cur_char_ == '.') {
         num_str += cur_char_;
         get_next_char();
       }
@@ -79,10 +75,8 @@ public:
 
     // check wheather current token is a number of not.
     // if this hits, this pass throgh the charactors until the newline.
-    if (cur_char_ == '#')
-    {
-      do
-      {
+    if (cur_char_ == '#') {
+      do {
         get_next_char();
       } while (cur_char_ != EOF && cur_char_ != '\n' && cur_char_ != '\r');
 
@@ -100,27 +94,14 @@ public:
     get_next_char();
 
     /// check wheather current tokey is one of the following items.
-    if (last_char == '(')
-    {
+    if (last_char == '(') {
       return {TokenType::ParenL, last_char};
-    }
-    else if (last_char == ')')
-    {
+    } else if (last_char == ')') {
       return {TokenType::ParenR, last_char};
-    }
-    else if (last_char == ',')
-    {
+    } else if (last_char == ',') {
       return {TokenType::Comma, last_char};
-    }
-    else if (last_char == ';')
-    {
+    } else if (last_char == ';') {
       return {TokenType::Semicolon, last_char};
-    }
-
-    // check wheather current token is the end of file or not.
-    if (last_char == EOF)
-    {
-      return {TokenType::Eof, static_cast<char>(EOF)};
     }
 
     // return the charactors as just sequence of ASCII.
@@ -133,6 +114,8 @@ private:
     strm_.get(cur_char_);
     return cur_char_;
   }
+
+  const bool is_eof() { return strm_.eof(); }
 
   void register_kw_token_map()
   {

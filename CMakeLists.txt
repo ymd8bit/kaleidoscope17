@@ -12,7 +12,8 @@ set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wno-unused-variable -Wno-un
 set(ROOT_DIR ${CMAKE_SOURCE_DIR})
 set(INCLUDE_DIR ${ROOT_DIR}/include)
 set(SRC_DIR ${ROOT_DIR}/src)
-set(REF_DIR ${ROOT_DIR}/ref)
+set(TESTS_DIR ${ROOT_DIR}/tests)
+set(BUILD_DIR ${CMAKE_BINARY_DIR})
 
 find_package(LLVM 7 CONFIG)
 llvm_map_components_to_libnames(LLVM_LIBS core support demangle mcjit native)
@@ -22,7 +23,14 @@ message(STATUS "LLVM_DEFINITIONS: ${LLVM_DEFINITIONS}")
 message(STATUS "LLVM_LIBS: ${LLVM_LIBS}")
 
 file(GLOB_RECURSE SOURCES ${SRC_DIR}/*.cpp)
-add_executable(kaleidoscope ${SOURCES})
-target_include_directories(kaleidoscope PRIVATE ${INCLUDE_DIR} ${LLVM_INCLUDE_DIRS})
-target_link_libraries(kaleidoscope PRIVATE ${LLVM_LIBS})
-target_compile_definitions(kaleidoscope PRIVATE ${LLVM_DEFINITIONS})
+
+set(EXE_NAME kaleidoscope17)
+add_executable(${EXE_NAME} ${SOURCES})
+target_include_directories(${EXE_NAME} PRIVATE ${INCLUDE_DIR} ${LLVM_INCLUDE_DIRS})
+target_link_libraries(${EXE_NAME} PRIVATE ${LLVM_LIBS})
+target_compile_definitions(${EXE_NAME} PRIVATE ${LLVM_DEFINITIONS})
+
+set(EXE_PATH ${BUILD_DIR}/${EXE_NAME})
+
+enable_testing()
+add_subdirectory(${TESTS_DIR})
