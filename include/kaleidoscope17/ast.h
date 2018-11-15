@@ -31,34 +31,43 @@ using ExprPtr = std::unique_ptr<ExprAST>;
 
 class NumExprAST
 {
+private:
+  num_t num_;
+
 public:
   NumExprAST() = default;
   NumExprAST(num_t num) : num_{num} {};
 
-private:
-  num_t num_;
+  inline num_t num() const { return num_; }
 };
 
 class VarExprAST
 {
+private:
+  std::string name_;
+
 public:
   VarExprAST() = default;
   VarExprAST(const std::string &name) : name_{name} {}
 
-private:
-  std::string name_;
+  inline const std::string &name() const { return name_; }
 };
 
 class BinaryExprAST
 {
+private:
+  char op_;
+  std::unique_ptr<ExprAST> lhs_, rhs_;
+
 public:
   BinaryExprAST(char op, ExprPtr lhs, ExprPtr rhs)
     : op_{op}, lhs_{std::move(lhs)}, rhs_{std::move(rhs)}
   {}
 
-private:
-  char op_;
-  std::unique_ptr<ExprAST> lhs_, rhs_;
+  inline ExprAST &lhs() { return *(lhs_.get()); }
+  inline ExprAST &rhs() { return *(rhs_.get()); }
+  inline const ExprAST &lhs() const { return *(lhs_.get()); }
+  inline const ExprAST &rhs() const { return *(rhs_.get()); }
 };
 
 class CallExprAST
