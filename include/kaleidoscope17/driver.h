@@ -1,5 +1,5 @@
-#ifndef KALEIDOSCOPE_DRIVER_H
-#define KALEIDOSCOPE_DRIVER_H
+#ifndef KALEIDOSCOPE17_DRIVER_H
+#define KALEIDOSCOPE17_DRIVER_H
 
 #include "kaleidoscope17/parser.h"
 #include "kaleidoscope17/token.h"

@@ -1,12 +1,11 @@
-#ifndef KALEIDOSCOPE_TOKEN_H
-#define KALEIDOSCOPE_TOKEN_H
+#ifndef KALEIDOSCOPE17_TOKEN_H
+#define KALEIDOSCOPE17_TOKEN_H
 
 #include <cstdint>
 #include <string>
 #include <variant>
 
-namespace kaleidoscope17
-{
+namespace kaleidoscope17 {
 
 enum class TokenType
 {

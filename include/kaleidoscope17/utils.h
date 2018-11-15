@@ -1,5 +1,5 @@
-#ifndef KALEIDOSCOPE_UTILS_H
-#define KALEIDOSCOPE_UTILS_H
+#ifndef KALEIDOSCOPE17_UTILS_H
+#define KALEIDOSCOPE17_UTILS_H
 
 #include "kaleidoscope17/ast.h"
 #include "kaleidoscope17/logger.h"
@@ -10,8 +10,7 @@
 #include <string>
 #include <variant>
 
-namespace kaleidoscope17
-{
+namespace kaleidoscope17 {
 
 void print_token(Token &token);
 const std::string expr_ptr_name(ExprPtr &exptr);

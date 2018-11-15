@@ -1,5 +1,5 @@
-#ifndef KALEIDOSCOPE_AST_H
-#define KALEIDOSCOPE_AST_H
+#ifndef KALEIDOSCOPE17_AST_H
+#define KALEIDOSCOPE17_AST_H
 
 #include "kaleidoscope17/token.h"
 
@@ -8,8 +8,7 @@
 #include <variant>
 #include <vector>
 
-namespace kaleidoscope17
-{
+namespace kaleidoscope17 {
 
 class NumExprAST;
 class VarExprAST;
@@ -54,9 +53,8 @@ class BinaryExprAST
 {
 public:
   BinaryExprAST(char op, ExprPtr lhs, ExprPtr rhs)
-      : op_{op}, lhs_{std::move(lhs)}, rhs_{std::move(rhs)}
-  {
-  }
+    : op_{op}, lhs_{std::move(lhs)}, rhs_{std::move(rhs)}
+  {}
 
 private:
   char op_;
@@ -68,9 +66,8 @@ class CallExprAST
 public:
   CallExprAST(const std::string &callee,
               std::vector<std::unique_ptr<ExprAST>> args)
-      : callee_{callee}, args_{std::move(args)}
-  {
-  }
+    : callee_{callee}, args_{std::move(args)}
+  {}
 
 private:
   std::string callee_;
@@ -84,9 +81,8 @@ public:
   ~PrototypeAST() = default;
 
   PrototypeAST(const std::string &name, std::vector<std::string> args)
-      : name_{name}, args_{args}
-  {
-  }
+    : name_{name}, args_{args}
+  {}
 
 private:
   std::string name_;
@@ -100,9 +96,8 @@ public:
   ~FunctionAST() = default;
 
   FunctionAST(ProtoPtr proto, ExprPtr body)
-      : proto_{std::move(proto)}, body_{std::move(body)}
-  {
-  }
+    : proto_{std::move(proto)}, body_{std::move(body)}
+  {}
 
 private:
   ProtoPtr proto_;

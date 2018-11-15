@@ -1,5 +1,5 @@
-#ifndef KALEIDOSCOPE_LOGGER_H
-#define KALEIDOSCOPE_LOGGER_H
+#ifndef KALEIDOSCOPE17_LOGGER_H
+#define KALEIDOSCOPE17_LOGGER_H
 
 #include <iostream>
 #include <string>
@@ -8,8 +8,7 @@ using std::endl;
 using std::ostream;
 using std::string;
 
-namespace kaleidoscope17
-{
+namespace kaleidoscope17 {
 
 struct Logger
 {
@@ -47,8 +46,7 @@ struct Logger
   ::kaleidoscope17::Logger::DebugHeader(#TAG, FILE, FUNC, LINE)
 
 #define ASSERT(COND, MSG)                                                  \
-  if (!(COND))                                                             \
-  {                                                                        \
+  if (!(COND)) {                                                           \
     DEBUG_HEADER(Assert, __FILE__, __FUNCTION__, __LINE__) << MSG << "\n"; \
   }                                                                        \
   assert(COND);

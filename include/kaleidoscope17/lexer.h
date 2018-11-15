@@ -1,5 +1,5 @@
-#ifndef KALEIDOSCOPE_LEXER_H
-#define KALEIDOSCOPE_LEXER_H
+#ifndef KALEIDOSCOPE17_LEXER_H
+#define KALEIDOSCOPE17_LEXER_H
 
 #include "kaleidoscope17/token.h"
 
