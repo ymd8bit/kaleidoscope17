@@ -23,7 +23,12 @@ expected = textwrap.dedent('''\
 
 
 if __name__ == "__main__":
-    cmd = f'{env.TARGET_EXECUTABLE_PATH} {env.TESTS_DATA_DIR}/test_input.txt'
+    args = [
+        f'{env.TARGET_EXECUTABLE_PATH}',  # executable name
+        f'{env.TESTS_DATA_DIR}/test_input.txt',  # input data path
+        'debug'  # debug_mode on
+    ]
+    cmd = ' '.join(args)
     result = utils.run_shell(cmd, env.BUILD_DIR)
     assert result == expected, \
         "[test_parse] the result doesn't match to the expected...Test"
