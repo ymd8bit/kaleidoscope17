@@ -16,12 +16,14 @@ class Driver final
 private:
   Parser parser_;
   Core core_;
+  const bool debug_mode_ = false;
 
 public:
   Driver() = default;
   ~Driver() = default;
 
-  Driver(std::istream &strm) : parser_{strm}, core_{} {};
+  Driver(std::istream &strm, const bool debug_mode = false)
+    : parser_{strm}, core_{}, debug_mode_{debug_mode} {};
 
   void mainloop()
   {
@@ -31,7 +33,7 @@ public:
 
       switch (token.type) {
         case TokenType::Eof:
-          std::cout << "EOF" << std::endl;
+          handle_eof();
           return;
         case TokenType::Semicolon:
           break;
@@ -50,37 +52,58 @@ public:
           handle_top_level_expr();
           break;
       }
+
+      std::cout << std::endl;
+    }
+  }
+
+  void handle_eof()
+  {
+    if (debug_mode_) {
+      std::cout << "EOF" << std::endl;
     }
   }
 
   void handle_def()
   {
     auto func_ptr = parser_.parse_def();
-    if (func_ptr) {
-      std::cout << "Parsed a function definition." << std::endl;
+    if (!func_ptr) {
+      EXCEPTION("failed to parse define statement");
     }
-    auto code_gen_visitor = PrintVisitor();
-    code_gen_visitor(*(func_ptr.get()));
+
+    if (debug_mode_) {
+      std::cout << "parsed a function definition." << std::endl;
+      auto code_gen_visitor = PrintVisitor();
+      code_gen_visitor(*(func_ptr.get()));
+    }
   }
 
   void handle_extern()
   {
     auto proto_ptr = parser_.parse_extern();
-    if (proto_ptr) {
-      std::cout << "Parsed an extern." << std::endl;
+    if (!proto_ptr) {
+      EXCEPTION("failed to parse extern statement");
     }
-    auto code_gen_visitor = PrintVisitor();
-    code_gen_visitor(*(proto_ptr.get()));
+
+    if (debug_mode_) {
+      std::cout << "parsed an extern." << std::endl;
+      auto code_gen_visitor = PrintVisitor();
+      code_gen_visitor(*(proto_ptr.get()));
+    }
   }
 
   void handle_top_level_expr()
   {
     auto func_ptr = parser_.parse_top_level_expr();
-    if (func_ptr) {
-      std::cout << "Parsed a top-level expr." << std::endl;
+    if (!func_ptr) {
+      EXCEPTION("failed to parse extern statement");
     }
-    auto code_gen_visitor = PrintVisitor();
-    code_gen_visitor(*(func_ptr.get()));
+
+    if (debug_mode_) {
+      std::cout << "parsed a top-level expr." << std::endl;
+      auto code_gen_visitor = PrintVisitor();
+      code_gen_visitor(*(func_ptr.get()));
+    }
   }
 };
 

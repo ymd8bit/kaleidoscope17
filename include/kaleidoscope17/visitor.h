@@ -72,7 +72,7 @@ public:
     std::cout << "FunctionAST{";
     (*this)(ast.proto());
     std::visit(*this, ast.body());
-    std::cout << "}" << std::endl;
+    std::cout << "}";
   }
 };
 
@@ -139,7 +139,7 @@ public:
     std::cout << "FunctionAST{";
     (*this)(ast.proto());
     std::visit(*this, ast.body());
-    std::cout << "}" << std::endl;
+    std::cout << "}";
   }
 };
 
