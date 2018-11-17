@@ -1,3 +1,13 @@
-def f(a, b) a + b;
-x + y;
+def f1() 5;
+def f2(a, b) a + b;
+
+extern h1();
+extern h2(r);
+
+# should be ignored 1
+######## def should_be_ignored2(a, b)
+
+x + y; # becomes lambda 
+
 def g(v, u) v - g(u, 4.0);
+

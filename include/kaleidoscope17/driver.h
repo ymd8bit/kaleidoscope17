@@ -55,16 +55,22 @@ public:
 
   void handle_def()
   {
-    if (auto func_ptr = parser_.parse_def()) {
+    auto func_ptr = parser_.parse_def();
+    if (func_ptr) {
       std::cout << "Parsed a function definition." << std::endl;
     }
+    auto code_gen_visitor = PrintVisitor();
+    code_gen_visitor(*(func_ptr.get()));
   }
 
   void handle_extern()
   {
-    if (auto proto_ptr = parser_.parse_extern()) {
+    auto proto_ptr = parser_.parse_extern();
+    if (proto_ptr) {
       std::cout << "Parsed an extern." << std::endl;
     }
+    auto code_gen_visitor = PrintVisitor();
+    code_gen_visitor(*(proto_ptr.get()));
   }
 
   void handle_top_level_expr()
@@ -73,9 +79,8 @@ public:
     if (func_ptr) {
       std::cout << "Parsed a top-level expr." << std::endl;
     }
-
-    // auto code_gen_visitor = CodeGenVisitor(&core_);
-    // code_gen_visitor(*(func_ptr.get()));
+    auto code_gen_visitor = PrintVisitor();
+    code_gen_visitor(*(func_ptr.get()));
   }
 };
 

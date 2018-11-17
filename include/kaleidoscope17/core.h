@@ -11,16 +11,14 @@
 
 namespace kaleidoscope17 {
 
-class Core
+struct Core
 {
-private:
-  llvm::LLVMContext ctx_;
-  llvm::IRBuilder<> builder_;
-  std::unique_ptr<llvm::Module> mod_;
-  std::map<std::string, llvm::Value *> named_values_;
+  llvm::LLVMContext ctx;
+  llvm::IRBuilder<> builder;
+  std::unique_ptr<llvm::Module> mod;
+  std::map<std::string, llvm::Value *> named_values;
 
-public:
-  Core() : ctx_{}, builder_{ctx_}, mod_{}, named_values_{} {}
+  Core() : ctx{}, builder{ctx}, mod{}, named_values{} {}
 };
 
 } // namespace kaleidoscope17

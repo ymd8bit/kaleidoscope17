@@ -64,42 +64,52 @@ public:
     : op_{op}, lhs_{std::move(lhs)}, rhs_{std::move(rhs)}
   {}
 
-  inline ExprAST &lhs() { return *(lhs_.get()); }
-  inline ExprAST &rhs() { return *(rhs_.get()); }
-  inline const ExprAST &lhs() const { return *(lhs_.get()); }
-  inline const ExprAST &rhs() const { return *(rhs_.get()); }
+  inline const auto &lhs() const { return *(lhs_.get()); }
+  inline const auto &rhs() const { return *(rhs_.get()); }
+  inline const auto op() const { return op_; }
 };
 
 class CallExprAST
 {
+private:
+  std::string callee_;
+  std::vector<std::unique_ptr<ExprAST>> args_;
+
 public:
   CallExprAST(const std::string &callee,
               std::vector<std::unique_ptr<ExprAST>> args)
     : callee_{callee}, args_{std::move(args)}
   {}
 
-private:
-  std::string callee_;
-  std::vector<std::unique_ptr<ExprAST>> args_;
+  inline const auto &callee() const { return callee_; }
+  inline const auto &args() const { return args_; }
 };
 
 class PrototypeAST
 {
+private:
+  std::string name_;
+  std::vector<std::string> arg_names_;
+
 public:
   PrototypeAST() = default;
   ~PrototypeAST() = default;
 
-  PrototypeAST(const std::string &name, std::vector<std::string> args)
-    : name_{name}, args_{args}
+  PrototypeAST(const std::string &name,
+               const std::vector<std::string> &arg_names)
+    : name_{name}, arg_names_{arg_names}
   {}
 
-private:
-  std::string name_;
-  std::vector<std::string> args_;
+  inline const auto &name() const { return name_; }
+  inline const auto &arg_names() const { return arg_names_; }
 };
 
 class FunctionAST
 {
+private:
+  ProtoPtr proto_;
+  ExprPtr body_;
+
 public:
   FunctionAST() = default;
   ~FunctionAST() = default;
@@ -108,14 +118,9 @@ public:
     : proto_{std::move(proto)}, body_{std::move(body)}
   {}
 
-private:
-  ProtoPtr proto_;
-  ExprPtr body_;
+  inline const auto &proto() const { return *(proto_.get()); }
+  inline const auto &body() const { return *(body_.get()); }
 };
-
-// using NodeAST = std::variant<NumExprAST, BinaryExprAST>;
-
-// using BinaryExprPtr = std::unique_ptr<BinaryExprAST>;
 
 } // namespace kaleidoscope17
 

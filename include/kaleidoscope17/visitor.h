@@ -7,50 +7,139 @@
 
 #include "kaleidoscope17/ast.h"
 #include "kaleidoscope17/core.h"
+#include "llvm/ADT/APFloat.h"
+#include "llvm/IR/GlobalValue.h"
+#include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Value.h"
 
 namespace kaleidoscope17 {
 
-class CodeGenVisitor
+class PrintVisitor
+{
+public:
+  PrintVisitor() = default;
+
+  void operator()(const NumExprAST& ast)
+  {
+    std::cout << "NumExprAST(" << ast.num() << ")";
+  }
+
+  void operator()(const VarExprAST& ast)
+  {
+    std::cout << "VarExprAST(" << ast.name() << ")";
+  }
+
+  void operator()(const BinaryExprAST& ast)
+  {
+    std::cout << "BinaryExprAST(";
+    std::visit(*this, ast.lhs());
+    std::cout << " " << ast.op() << " ";
+    std::visit(*this, ast.rhs());
+    std::cout << ")";
+  }
+
+  void operator()(const CallExprAST& ast)
+  {
+    std::cout << "CallExprAST{";
+    std::cout << ast.callee();
+    std::cout << "(";
+    const auto& args = ast.args();
+    for (size_t i = 0; i < args.size(); i++) {
+      std::visit(*this, *(args[i].get()));
+      if (i != args.size() - 1) {
+        std::cout << ", ";
+      }
+    }
+    std::cout << ")}";
+  }
+
+  void operator()(const PrototypeAST& ast)
+  {
+    std::cout << "PrototypeAST{";
+    std::cout << ast.name() << "(";
+    const auto& arg_names = ast.arg_names();
+    for (size_t i = 0; i < arg_names.size(); i++) {
+      std::cout << arg_names[i];
+      if (i != arg_names.size() - 1) {
+        std::cout << ", ";
+      }
+    }
+    std::cout << ")}";
+  }
+
+  void operator()(const FunctionAST& ast)
+  {
+    std::cout << "FunctionAST{";
+    (*this)(ast.proto());
+    std::visit(*this, ast.body());
+    std::cout << "}" << std::endl;
+  }
+};
+
+class CodegenVisitor
 {
 private:
-  std::shared_ptr<Core> core_;
+  Core* core_;
 
 public:
-  CodeGenVisitor(Core* core) : core_{core} {}
+  CodegenVisitor(Core* core) : core_{core} {};
 
-  void operator()(NumExprAST& expr_ast)
+  // llvm::Value* operator()(const NumExprAST& ast)
+  // {
+  //   return llvm::ConstantFP::get(core_->ctx, llvm::APFloat(ast.num()));
+  // }
+
+  void operator()(const NumExprAST& ast) {}
+
+  void operator()(const VarExprAST& ast)
   {
-    std::cout << "NumExprAST(" << expr_ast.num() << ")" << std::endl;
+    std::cout << "VarExprAST(" << ast.name() << ")";
   }
 
-  void operator()(VarExprAST& expr_ast)
+  void operator()(const BinaryExprAST& ast)
   {
-    std::cout << "VarExprAST(" << expr_ast.name() << ")" << std::endl;
+    std::cout << "BinaryExprAST(";
+    std::visit(*this, ast.lhs());
+    std::cout << " " << ast.op() << " ";
+    std::visit(*this, ast.rhs());
+    std::cout << ")";
   }
 
-  void operator()(BinaryExprAST& binary_expr)
+  void operator()(const CallExprAST& ast)
   {
-    std::cout << "BinaryExprAST" << std::endl;
-    std::cout << "arg1: ";
-    std::visit(*this, binary_expr.lhs());
-    std::cout << "arg2: ";
-    std::visit(*this, binary_expr.rhs());
+    std::cout << "CallExprAST{";
+    std::cout << ast.callee();
+    std::cout << "(";
+    const auto& args = ast.args();
+    for (size_t i = 0; i < args.size(); i++) {
+      std::visit(*this, *(args[i].get()));
+      if (i != args.size() - 1) {
+        std::cout << ", ";
+      }
+    }
+    std::cout << ")}";
   }
 
-  void operator()(CallExprAST& expr_ast)
+  void operator()(const PrototypeAST& ast)
   {
-    std::cout << "CallExprAST" << std::endl;
+    std::cout << "PrototypeAST{";
+    std::cout << ast.name() << "(";
+    const auto& arg_names = ast.arg_names();
+    for (size_t i = 0; i < arg_names.size(); i++) {
+      std::cout << arg_names[i];
+      if (i != arg_names.size() - 1) {
+        std::cout << ", ";
+      }
+    }
+    std::cout << ")}";
   }
 
-  void operator()(PrototypeAST& expr_ast)
+  void operator()(const FunctionAST& ast)
   {
-    std::cout << "PrototypeAST" << std::endl;
-  }
-
-  void operator()(FunctionAST& expr_ast)
-  {
-    std::cout << "FunctionAST" << std::endl;
+    std::cout << "FunctionAST{";
+    (*this)(ast.proto());
+    std::visit(*this, ast.body());
+    std::cout << "}" << std::endl;
   }
 };
 

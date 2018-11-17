@@ -35,7 +35,7 @@ public:
   Token get_next_token()
   {
     cur_token_ = lexer_.get_token();
-    print_token(cur_token_);
+    // print_token(cur_token_);
     return cur_token_;
   }
 
@@ -177,11 +177,12 @@ public:
     // read the list of argument names.
     std::vector<std::string> arg_names;
 
+    // read next token, which should be ')' or the 1st argument ID
+    get_next_token();
+
     // if current expression has one or more arguments.
     if (current_token_is_not(TokenType::ParenR)) {
       while (true) {
-        // read 1st argument, which should be an ID.
-        get_next_token();
         if (current_token_is(TokenType::Id)) {
           // push parsed arg into args list.
           arg_names.push_back(get_current_id_str());
@@ -193,15 +194,19 @@ public:
 
         // found the end of the argument.
         if (current_token_is(TokenType::ParenR)) {
-          get_next_token(); // eat ')'.
           break;
         }
 
         if (current_token_is_not(TokenType::Comma)) {
           EXCEPTION("Expected ')' or ',' in prototype...");
+        } else {
+          get_next_token(); // eat ','
         }
       }
     }
+
+    // we need to eat ')'.
+    get_next_token();
 
     return std::make_unique<PrototypeAST>(func_name, arg_names);
   }

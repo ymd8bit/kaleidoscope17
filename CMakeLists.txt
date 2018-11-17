@@ -7,7 +7,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Werror -Wpedantic -Wno-unused-variable -Wno-unused-private-field -Wno-error=unused-command-line-argument -O0 -g")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Werror -Wpedantic -Wno-unused-variable -Wno-unused-private-field -Wno-error=unused-command-line-argument -fno-omit-frame-pointer -fsanitize=address -O0 -g")
+
 
 get_filename_component(ROOT_DIR ${CMAKE_SOURCE_DIR} ABSOLUTE)
 get_filename_component(INCLUDE_DIR ${ROOT_DIR}/include ABSOLUTE)

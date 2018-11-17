@@ -8,42 +8,17 @@ import textwrap
 THIS_FILE_PATH = path.abspath(__file__)
 
 expected = textwrap.dedent('''\
-    Kaleidoscope >> TokenType::Def
-    ID(f)
-    TokenType::ParenL
-    ID(a)
-    TokenType::Comma
-    ID(b)
-    TokenType::ParenR
-    ID(a)
-    TokenType::GenericAscii(+)
-    ID(b)
-    TokenType::Semicolon
-    Parsed a function definition.
-    Kaleidoscope >> ID(x)
-    TokenType::GenericAscii(+)
-    ID(y)
-    TokenType::Semicolon
-    Parsed a top-level expr.
-    Kaleidoscope >> TokenType::Def
-    ID(g)
-    TokenType::ParenL
-    ID(v)
-    TokenType::Comma
-    ID(u)
-    TokenType::ParenR
-    ID(v)
-    TokenType::GenericAscii(-)
-    ID(g)
-    TokenType::ParenL
-    ID(u)
-    TokenType::Comma
-    Number,(4.000000)
-    TokenType::ParenR
-    TokenType::Semicolon
-    Parsed a function definition.
-    Kaleidoscope >> TokenType::EOF
-    EOF\
+    Kaleidoscope >> Parsed a function definition.
+    FunctionAST{PrototypeAST{f1()}NumExprAST(5)}
+    Kaleidoscope >> Parsed a function definition.
+    FunctionAST{PrototypeAST{f2(a, b)}BinaryExprAST(VarExprAST(a) + VarExprAST(b))}
+    Kaleidoscope >> Parsed an extern.
+    PrototypeAST{h1()}Kaleidoscope >> Parsed an extern.
+    PrototypeAST{h2(r)}Kaleidoscope >> Parsed a top-level expr.
+    FunctionAST{PrototypeAST{()}BinaryExprAST(VarExprAST(x) + VarExprAST(y))}
+    Kaleidoscope >> Parsed a function definition.
+    FunctionAST{PrototypeAST{g(v, u)}BinaryExprAST(VarExprAST(v) - CallExprAST{g(VarExprAST(u), NumExprAST(4))})}
+    Kaleidoscope >> EOF\
 ''')
 
 
