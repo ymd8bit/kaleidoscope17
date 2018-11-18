@@ -128,7 +128,7 @@ public:
   llvm::Value* operator()(const CallExprAST& ast)
   {
     auto* mod = core_->module.get();
-    llvm::Function* callee_f = mod->getFunction(ast.callee());
+    auto callee_f = mod->getFunction(ast.callee());
     if (!callee_f) {
       EXCEPTION("Unknown function is referenced...");
     }
@@ -152,11 +152,11 @@ public:
     std::vector<llvm::Type*> arg_types(ast.arg_names().size(),
                                        llvm::Type::getDoubleTy(core_->context));
 
-    llvm::FunctionType* func_type = llvm::FunctionType::get(
+    auto* func_type = llvm::FunctionType::get(
       llvm::Type::getDoubleTy(core_->context), arg_types, false);
 
     auto* mod = core_->module.get();
-    llvm::Function* func = llvm::Function::Create(
+    auto* func = llvm::Function::Create(
       func_type, llvm::Function::ExternalLinkage, ast.name(), mod);
 
     // set arguments' name to llvm::Function object.
@@ -172,7 +172,7 @@ public:
     // declaration.
     auto* mod = core_->module.get();
     auto& name = ast.proto().name();
-    llvm::Function* func = mod->getFunction(name);
+    auto* func = mod->getFunction(name);
 
     if (!func) {
       func = static_cast<decltype(func)>((*this)(ast.proto()));
@@ -187,8 +187,7 @@ public:
     }
 
     // create a new basic block to start insertion into.
-    llvm::BasicBlock* bb =
-      llvm::BasicBlock::Create(core_->context, "entry", func);
+    auto* bb = llvm::BasicBlock::Create(core_->context, "entry", func);
     core_->builder.SetInsertPoint(bb);
 
     for (auto& arg : func->args()) { core_->set_value(arg.getName(), &arg); }

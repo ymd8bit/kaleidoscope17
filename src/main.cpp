@@ -15,7 +15,7 @@ int main(int argc, char const *argv[])
     EXCEPTION("Number of the given input arguments should be 0 or 1...");
   } else if (args.size() == 0) {
     /// run compiler with standard out.
-    Driver driver(std::cin, std::cout);
+    Driver driver(std::cin, std::cout, true); // debug_mode true.
     driver.mainloop();
   } else {
     /// run compiler with the given text file by the 1st argument.

@@ -41,7 +41,9 @@ public:
   void mainloop()
   {
     while (true) {
-      ostrm_ << "Kaleidoscope >> ";
+      if (debug_mode_) {
+        ostrm_ << "Kaleidoscope >> ";
+      }
       auto token = parser_.get_next_token();
 
       switch (token.type) {
@@ -66,7 +68,9 @@ public:
           break;
       }
 
-      ostrm_ << std::endl;
+      if (debug_mode_) {
+        ostrm_ << std::endl;
+      }
     }
   }
 
@@ -113,10 +117,10 @@ public:
     if (debug_mode_) {
       ostrm_ << header << std::endl;
       ostrm_ << "\n";
-      ostrm_ << "-- Parsed Result" << std::endl;
+      ostrm_ << "-- parsed result" << std::endl;
       print_pased_result(expr_ptr);
       ostrm_ << "\n\n";
-      ostrm_ << "-- Generated LLVM IR" << std::endl;
+      ostrm_ << "-- generated LLVM IR" << std::endl;
       print_generated_llvm_ir(expr_ptr);
     }
   }
