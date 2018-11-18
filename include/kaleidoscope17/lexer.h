@@ -16,13 +16,13 @@ class Lexer
 {
   using kwTokenMap = std::map<std::string, TokenType>;
 
-  std::istream strm_;
+  std::istream istrm_;
   char cur_char_ = ' ';
   Token cur_token_;
   kwTokenMap kw_token_map_;
 
 public:
-  Lexer(std::istream &strm) : strm_{strm.rdbuf()}
+  Lexer(std::istream &istrm) : istrm_{istrm.rdbuf()}
   { // should be intialized with a space.
     register_kw_token_map();
   }
@@ -111,11 +111,11 @@ public:
 private:
   const char get_next_char()
   {
-    strm_.get(cur_char_);
+    istrm_.get(cur_char_);
     return cur_char_;
   }
 
-  const bool is_eof() { return strm_.eof(); }
+  const bool is_eof() { return istrm_.eof(); }
 
   void register_kw_token_map()
   {

@@ -28,7 +28,7 @@ public:
   Parser() = delete;
   ~Parser() = default;
 
-  Parser(std::istream &strm) : lexer_{strm} { set_binop_precedence_(); }
+  Parser(std::istream &istrm) : lexer_{istrm} { set_binop_precedence_(); }
 
   Token get_current_token() { return cur_token_; }
 
@@ -161,7 +161,7 @@ public:
   }
 
   /// prototype ::= id '(' id* ')'
-  ProtoPtr parse_proto()
+  PrototypePtr parse_proto()
   {
     if (current_token_is_not(TokenType::Id)) {
       EXCEPTION("Expected function name in prototype...");
@@ -212,7 +212,7 @@ public:
   }
 
   /// definition ::= 'def' prototype expression
-  FuncPtr parse_def()
+  FunctionPtr parse_def()
   {
     get_next_token();
     auto proto = parse_proto();
@@ -225,14 +225,14 @@ public:
   }
 
   /// extern ::= 'extern' prototype
-  ProtoPtr parse_extern()
+  PrototypePtr parse_extern()
   {
     get_next_token(); // eat 'extern'.
     return parse_proto();
   }
 
   /// toplevel_expr ::= expression
-  FuncPtr parse_top_level_expr()
+  FunctionPtr parse_top_level_expr()
   {
     if (auto expr = parse_expr()) {
       auto proto =
@@ -251,7 +251,7 @@ private:
   //   return nullptr;
   // }
 
-  // inline ProtoPtr log_error_proto(const std::string& msg)
+  // inline PrototypePtr log_error_proto(const std::string& msg)
   // {
   //   Logger::Fatal(msg);
   //   return nullptr;

@@ -25,8 +25,8 @@ using NumExprPtr = std::unique_ptr<NumExprAST>;
 using VarExprPtr = std::unique_ptr<VarExprAST>;
 using BinaryExprPtr = std::unique_ptr<BinaryExprAST>;
 using CallExprPtr = std::unique_ptr<CallExprAST>;
-using ProtoPtr = std::unique_ptr<PrototypeAST>;
-using FuncPtr = std::unique_ptr<FunctionAST>;
+using PrototypePtr = std::unique_ptr<PrototypeAST>;
+using FunctionPtr = std::unique_ptr<FunctionAST>;
 using ExprPtr = std::unique_ptr<ExprAST>;
 
 class NumExprAST
@@ -107,19 +107,21 @@ public:
 class FunctionAST
 {
 private:
-  ProtoPtr proto_;
+  PrototypePtr proto_;
   ExprPtr body_;
 
 public:
   FunctionAST() = default;
   ~FunctionAST() = default;
 
-  FunctionAST(ProtoPtr proto, ExprPtr body)
+  FunctionAST(PrototypePtr proto, ExprPtr body)
     : proto_{std::move(proto)}, body_{std::move(body)}
   {}
 
   inline const auto &proto() const { return *(proto_.get()); }
   inline const auto &body() const { return *(body_.get()); }
+  // inline auto &proto_unsafe() const { return *(proto_.get()); }
+  // inline auto &body_unsafe() const { return *(body_.get()); }
 };
 
 } // namespace kaleidoscope17

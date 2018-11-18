@@ -11,68 +11,72 @@
 #include "llvm/IR/GlobalValue.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Value.h"
+#include "llvm/IR/Verifier.h"
 
 namespace kaleidoscope17 {
 
 class PrintVisitor
 {
+private:
+  std::ostream ostrm_;
+
 public:
-  PrintVisitor() = default;
+  PrintVisitor(std::ostream& ostrm) : ostrm_{ostrm.rdbuf()} {};
 
   void operator()(const NumExprAST& ast)
   {
-    std::cout << "NumExprAST(" << ast.num() << ")";
+    ostrm_ << "NumExprAST(" << ast.num() << ")";
   }
 
   void operator()(const VarExprAST& ast)
   {
-    std::cout << "VarExprAST(" << ast.name() << ")";
+    ostrm_ << "VarExprAST(" << ast.name() << ")";
   }
 
   void operator()(const BinaryExprAST& ast)
   {
-    std::cout << "BinaryExprAST(";
+    ostrm_ << "BinaryExprAST(";
     std::visit(*this, ast.lhs());
-    std::cout << " " << ast.op() << " ";
+    ostrm_ << " " << ast.op() << " ";
     std::visit(*this, ast.rhs());
-    std::cout << ")";
+    ostrm_ << ")";
   }
 
   void operator()(const CallExprAST& ast)
   {
-    std::cout << "CallExprAST{";
-    std::cout << ast.callee();
-    std::cout << "(";
+    ostrm_ << "CallExprAST{";
+    ostrm_ << ast.callee();
+    ostrm_ << "(";
     const auto& args = ast.args();
     for (size_t i = 0; i < args.size(); i++) {
       std::visit(*this, *(args[i].get()));
       if (i != args.size() - 1) {
-        std::cout << ", ";
+        ostrm_ << ", ";
       }
     }
-    std::cout << ")}";
+    ostrm_ << ")}";
   }
 
   void operator()(const PrototypeAST& ast)
   {
-    std::cout << "PrototypeAST{";
-    std::cout << ast.name() << "(";
+    ostrm_ << "PrototypeAST{";
+    ostrm_ << ast.name() << "(";
     const auto& arg_names = ast.arg_names();
     for (size_t i = 0; i < arg_names.size(); i++) {
-      std::cout << arg_names[i];
+      ostrm_ << arg_names[i];
       if (i != arg_names.size() - 1) {
-        std::cout << ", ";
+        ostrm_ << ", ";
       }
     }
-    std::cout << ")}";
+    ostrm_ << ")}";
   }
 
   void operator()(const FunctionAST& ast)
   {
-    std::cout << "FunctionAST{";
+    ostrm_ << "FunctionAST{";
     (*this)(ast.proto());
     std::visit(*this, ast.body());
-    std::cout << "}";
+    ostrm_ << "}";
   }
 };
 
@@ -84,62 +88,123 @@ private:
 public:
   CodegenVisitor(Core* core) : core_{core} {};
 
-  // llvm::Value* operator()(const NumExprAST& ast)
-  // {
-  //   return llvm::ConstantFP::get(core_->ctx, llvm::APFloat(ast.num()));
-  // }
-
-  void operator()(const NumExprAST& ast) {}
-
-  void operator()(const VarExprAST& ast)
+  llvm::Value* operator()(const NumExprAST& ast)
   {
-    std::cout << "VarExprAST(" << ast.name() << ")";
+    return llvm::ConstantFP::get(core_->context, llvm::APFloat(ast.num()));
   }
 
-  void operator()(const BinaryExprAST& ast)
+  llvm::Value* operator()(const VarExprAST& ast)
   {
-    std::cout << "BinaryExprAST(";
-    std::visit(*this, ast.lhs());
-    std::cout << " " << ast.op() << " ";
-    std::visit(*this, ast.rhs());
-    std::cout << ")";
+    return core_->get_value(ast.name());
   }
 
-  void operator()(const CallExprAST& ast)
+  llvm::Value* operator()(const BinaryExprAST& ast)
   {
-    std::cout << "CallExprAST{";
-    std::cout << ast.callee();
-    std::cout << "(";
-    const auto& args = ast.args();
-    for (size_t i = 0; i < args.size(); i++) {
-      std::visit(*this, *(args[i].get()));
-      if (i != args.size() - 1) {
-        std::cout << ", ";
-      }
+    auto* lhs_op = std::visit(*this, ast.lhs());
+    auto* rhs_op = std::visit(*this, ast.rhs());
+
+    if (!lhs_op) {
+      EXCEPTION("LHS operand is invalid...");
     }
-    std::cout << ")}";
-  }
 
-  void operator()(const PrototypeAST& ast)
-  {
-    std::cout << "PrototypeAST{";
-    std::cout << ast.name() << "(";
-    const auto& arg_names = ast.arg_names();
-    for (size_t i = 0; i < arg_names.size(); i++) {
-      std::cout << arg_names[i];
-      if (i != arg_names.size() - 1) {
-        std::cout << ", ";
-      }
+    if (!rhs_op) {
+      EXCEPTION("RHS operand is invalid...");
     }
-    std::cout << ")}";
+
+    switch (ast.op()) {
+      case '+':
+        return core_->builder.CreateFAdd(lhs_op, rhs_op, "add_f");
+      case '-':
+        return core_->builder.CreateFSub(lhs_op, rhs_op, "sub_f");
+      case '*':
+        return core_->builder.CreateFMul(lhs_op, rhs_op, "mul_f");
+      case '<':
+        return core_->builder.CreateFCmpULT(lhs_op, rhs_op, "cmp_lt_f");
+      default:
+        EXCEPTION("Invalid binary operator is called...");
+    }
   }
 
-  void operator()(const FunctionAST& ast)
+  llvm::Value* operator()(const CallExprAST& ast)
   {
-    std::cout << "FunctionAST{";
-    (*this)(ast.proto());
-    std::visit(*this, ast.body());
-    std::cout << "}";
+    auto* mod = core_->module.get();
+    llvm::Function* callee_f = mod->getFunction(ast.callee());
+    if (!callee_f) {
+      EXCEPTION("Unknown function is referenced...");
+    }
+
+    if (callee_f->arg_size() != ast.args().size()) {
+      EXCEPTION("Number of args don't match...");
+    }
+
+    std::vector<llvm::Value*> arg_values;
+    for (auto& arg : ast.args()) {
+      auto arg_value = std::visit(*this, *(arg.get()));
+      arg_values.push_back(arg_value);
+    }
+
+    return core_->builder.CreateCall(callee_f, arg_values, "call_f");
+  }
+
+  llvm::Value* operator()(const PrototypeAST& ast)
+  {
+    // Now, we support only double type as a number
+    std::vector<llvm::Type*> arg_types(ast.arg_names().size(),
+                                       llvm::Type::getDoubleTy(core_->context));
+
+    llvm::FunctionType* func_type = llvm::FunctionType::get(
+      llvm::Type::getDoubleTy(core_->context), arg_types, false);
+
+    auto* mod = core_->module.get();
+    llvm::Function* func = llvm::Function::Create(
+      func_type, llvm::Function::ExternalLinkage, ast.name(), mod);
+
+    // set arguments' name to llvm::Function object.
+    auto arg_name_ref = ast.arg_names().begin();
+    for (auto& arg : func->args()) { arg.setName(*arg_name_ref++); }
+
+    return func;
+  }
+
+  llvm::Value* operator()(const FunctionAST& ast)
+  {
+    // First, check for an existing function from a previous 'extern'
+    // declaration.
+    auto* mod = core_->module.get();
+    auto& name = ast.proto().name();
+    llvm::Function* func = mod->getFunction(name);
+
+    if (!func) {
+      func = static_cast<decltype(func)>((*this)(ast.proto()));
+    }
+
+    if (!func) {
+      EXCEPTION("This prototype isn't defined yet...");
+    }
+
+    if (!func->empty()) {
+      EXCEPTION("Function cannot be redefined...");
+    }
+
+    // create a new basic block to start insertion into.
+    llvm::BasicBlock* bb =
+      llvm::BasicBlock::Create(core_->context, "entry", func);
+    core_->builder.SetInsertPoint(bb);
+
+    for (auto& arg : func->args()) { core_->set_value(arg.getName(), &arg); }
+
+    if (llvm::Value* ret = std::visit(*this, ast.body())) {
+      // set a return value to the function.
+      core_->builder.CreateRet(ret);
+
+      // validate the generated code, checking for consistency and then return.
+      llvm::verifyFunction(*func);
+      return func;
+    }
+
+    // if any error happens while reading body, remove the function.
+    func->eraseFromParent();
+    EXCEPTION("Some problem happens while reading body...");
   }
 };
 

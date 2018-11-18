@@ -4,7 +4,9 @@
 #include "kaleidoscope17/core.h"
 #include "kaleidoscope17/parser.h"
 #include "kaleidoscope17/token.h"
+#include "kaleidoscope17/utils.h"
 #include "kaleidoscope17/visitor.h"
+#include "llvm/IR/Value.h"
 
 #include <cstdio>
 #include <iostream>
@@ -14,21 +16,32 @@ namespace kaleidoscope17 {
 class Driver final
 {
 private:
+  std::istream istrm_;
+  std::ostream ostrm_;
   Parser parser_;
   Core core_;
+  CodegenVisitor codegen_visitor_;
+  PrintVisitor print_visitor_;
   const bool debug_mode_ = false;
 
 public:
   Driver() = default;
   ~Driver() = default;
 
-  Driver(std::istream &strm, const bool debug_mode = false)
-    : parser_{strm}, core_{}, debug_mode_{debug_mode} {};
+  Driver(std::istream& istrm, std::ostream& ostrm,
+         const bool debug_mode = false)
+    : istrm_{istrm.rdbuf()}
+    , ostrm_{ostrm.rdbuf()}
+    , parser_{istrm}
+    , core_{}
+    , codegen_visitor_{&core_}
+    , print_visitor_{ostrm_}
+    , debug_mode_{debug_mode} {};
 
   void mainloop()
   {
     while (true) {
-      std::cout << "Kaleidoscope >> ";
+      ostrm_ << "Kaleidoscope >> ";
       auto token = parser_.get_next_token();
 
       switch (token.type) {
@@ -53,14 +66,14 @@ public:
           break;
       }
 
-      std::cout << std::endl;
+      ostrm_ << std::endl;
     }
   }
 
   void handle_eof()
   {
     if (debug_mode_) {
-      std::cout << "EOF" << std::endl;
+      ostrm_ << "EOF" << std::endl;
     }
   }
 
@@ -71,11 +84,7 @@ public:
       EXCEPTION("failed to parse define statement");
     }
 
-    if (debug_mode_) {
-      std::cout << "parsed a function definition." << std::endl;
-      auto code_gen_visitor = PrintVisitor();
-      code_gen_visitor(*(func_ptr.get()));
-    }
+    print_debug_info(func_ptr, "parsed a function definition.");
   }
 
   void handle_extern()
@@ -85,11 +94,7 @@ public:
       EXCEPTION("failed to parse extern statement");
     }
 
-    if (debug_mode_) {
-      std::cout << "parsed an extern." << std::endl;
-      auto code_gen_visitor = PrintVisitor();
-      code_gen_visitor(*(proto_ptr.get()));
-    }
+    print_debug_info(proto_ptr, "parsed an extern.");
   }
 
   void handle_top_level_expr()
@@ -99,11 +104,34 @@ public:
       EXCEPTION("failed to parse extern statement");
     }
 
+    print_debug_info(func_ptr, "parsed a top-level expr.");
+  }
+
+  template <typename T>
+  void print_debug_info(T& expr_ptr, const std::string& header)
+  {
     if (debug_mode_) {
-      std::cout << "parsed a top-level expr." << std::endl;
-      auto code_gen_visitor = PrintVisitor();
-      code_gen_visitor(*(func_ptr.get()));
+      ostrm_ << header << std::endl;
+      ostrm_ << "\n";
+      ostrm_ << "-- Parsed Result" << std::endl;
+      print_pased_result(expr_ptr);
+      ostrm_ << "\n\n";
+      ostrm_ << "-- Generated LLVM IR" << std::endl;
+      print_generated_llvm_ir(expr_ptr);
     }
+  }
+
+  template <typename T>
+  void print_pased_result(T& expr_ptr)
+  {
+    print_visitor_(*(expr_ptr.get()));
+  }
+
+  template <typename T>
+  void print_generated_llvm_ir(T& expr_ptr)
+  {
+    auto value = codegen_visitor_(*(expr_ptr.get()));
+    print_llvm_value(value, ostrm_);
   }
 };
 

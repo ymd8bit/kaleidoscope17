@@ -7,7 +7,7 @@ extern h2(r);
 # should be ignored 1
 ######## def should_be_ignored2(a, b)
 
-x + y; # becomes lambda 
+# x = 5; let is not supported yet...
 
 def g(v, u) v - g(u, 4.0);
 
