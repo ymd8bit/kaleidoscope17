@@ -14,9 +14,9 @@
 
 namespace kaleidoscope17 {
 
-void print_token(Token &token);
-const std::string expr_ptr_name(ExprPtr &exptr);
-void print_expr_ptr(ExprPtr &exptr);
+void print_token(const Token &token);
+const std::string expr_ptr_name(ExprPtr &expr_ptr);
+void print_expr_ptr(const ExprPtr &expr_ptr);
 void print_llvm_value(llvm::Value *value, std::ostream &os);
 
 } // namespace kaleidoscope17

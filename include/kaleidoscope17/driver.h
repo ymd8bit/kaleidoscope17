@@ -118,7 +118,7 @@ public:
       ostrm_ << header << std::endl;
       ostrm_ << "\n";
       ostrm_ << "-- parsed result" << std::endl;
-      print_pased_result(expr_ptr);
+      print_parsed_result(expr_ptr);
       ostrm_ << "\n\n";
       ostrm_ << "-- generated LLVM IR" << std::endl;
       print_generated_llvm_ir(expr_ptr);
@@ -126,7 +126,7 @@ public:
   }
 
   template <typename T>
-  void print_pased_result(T& expr_ptr)
+  void print_parsed_result(T& expr_ptr)
   {
     print_visitor_(*(expr_ptr.get()));
   }

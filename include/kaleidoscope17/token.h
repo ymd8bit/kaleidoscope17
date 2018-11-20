@@ -29,7 +29,7 @@ struct Token
   TokenType type;
   std::variant<num_t, std::string, char> val;
 
-  const std::string name();
+  const std::string name() const;
   // template <typename T>
   // const T val();
 };

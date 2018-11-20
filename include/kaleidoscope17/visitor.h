@@ -198,6 +198,9 @@ public:
 
       // validate the generated code, checking for consistency and then return.
       llvm::verifyFunction(*func);
+
+      // apply passes to the generated function, which defined in core.
+      core_->apply_passes(func);
       return func;
     }
 

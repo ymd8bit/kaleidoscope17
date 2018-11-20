@@ -8,7 +8,7 @@
 
 namespace kaleidoscope17 {
 
-void print_token(Token &token) { std::cout << token.name() << std::endl; }
+void print_token(const Token &token) { std::cout << token.name() << std::endl; }
 
 template <typename T>
 inline const bool isa(ExprAST &expr)
@@ -16,9 +16,9 @@ inline const bool isa(ExprAST &expr)
   return std::holds_alternative<T>(expr);
 }
 
-const std::string expr_ptr_name(ExprPtr &exptr)
+const std::string expr_ptr_name(const ExprPtr &expr_ptr)
 {
-  ExprAST &expr = *(exptr.get());
+  ExprAST &expr = *(expr_ptr.get());
   if (isa<NumExprAST>(expr)) {
     return "NumExprAsT";
   } else if (isa<VarExprAST>(expr)) {
@@ -36,9 +36,9 @@ const std::string expr_ptr_name(ExprPtr &exptr)
   }
 }
 
-void print_expr_ptr(ExprPtr &exptr)
+void print_expr_ptr(const ExprPtr &expr_ptr)
 {
-  std::cout << expr_ptr_name(exptr) << std::endl;
+  std::cout << expr_ptr_name(expr_ptr) << std::endl;
 }
 
 void print_llvm_value(llvm::Value *value, std::ostream &os)

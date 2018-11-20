@@ -6,33 +6,45 @@
 #include <string>
 
 #include "kaleidoscope17/utils.h"
+#include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
 #include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
+#include "llvm/Transforms/InstCombine/InstCombine.h"
+#include "llvm/Transforms/Scalar.h"
+#include "llvm/Transforms/Scalar/GVN.h"
 
 namespace kaleidoscope17 {
 
 struct Core
 {
+  using Module = llvm::Module;
+  using FunctionPassManager = llvm::legacy::FunctionPassManager;
+
   llvm::LLVMContext context;
   llvm::IRBuilder<> builder;
-  std::unique_ptr<llvm::Module> module;
+  std::unique_ptr<Module> module;
+  std::unique_ptr<FunctionPassManager> fpm;
   std::map<std::string, llvm::Value*> named_values;
 
   Core()
     : context{}
     , builder{context}
-    , module{std::make_unique<llvm::Module>("kaleidoscope17", context)}
+    , module{std::make_unique<Module>("kaleidoscope17", context)}
+    , fpm{std::make_unique<FunctionPassManager>(module.get())}
     , named_values{}
-  {}
+  {
+    init_fpm();
+  }
 
   llvm::Value* get_value(const std::string& name)
   {
     if (named_values.count(name)) {
       return named_values[name];
     } else {
-      EXCEPTION(name + " is not registerd in named_values...");
+      EXCEPTION(name + " is not registered in named_values...");
     }
   }
 
@@ -41,8 +53,24 @@ struct Core
     if (!named_values.count(name)) {
       named_values[name] = value;
     } else {
-      EXCEPTION(name + " is already registerd in named_values...");
+      EXCEPTION(name + " is already registered in named_values...");
     }
+  }
+
+  void apply_passes(llvm::Function* func) { fpm->run(*func); }
+
+private:
+  void init_fpm()
+  {
+    // Do simple "peephole" optimizations and bit-twiddling optimizations.
+    fpm->add(llvm::createInstructionCombiningPass());
+    // Reassociate expressions.
+    fpm->add(llvm::createReassociatePass());
+    // Eliminate Common SubExpressions.
+    fpm->add(llvm::createGVNPass());
+    // Simplify the control flow graph (deleting unreachable blocks, etc).
+    fpm->add(llvm::createCFGSimplificationPass());
+    fpm->doInitialization();
   }
 };
 

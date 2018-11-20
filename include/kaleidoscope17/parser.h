@@ -64,6 +64,7 @@ public:
     if (current_token_is_not(TokenType::ParenR)) {
       EXCEPTION("expected ')' here.");
     }
+    get_next_token(); // eat right parenthesis ')'
     return v;
   }
 
@@ -113,6 +114,7 @@ public:
   ///         :: = paren_expr
   ExprPtr parse_primary()
   {
+    // print_token(get_current_token());
     switch (get_current_token().type) {
       default:
         EXCEPTION("Unknown primary token found...");

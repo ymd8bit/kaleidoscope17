@@ -11,3 +11,8 @@ extern h2(r);
 
 def g(v, u) v - g(u, 4.0);
 
+# must be optimized
+def f3(x) (2.0 + x) + (x + (1.0 + 2.0));
+def f4(z) (1+2+z)*(z+(1+2));
+
+
