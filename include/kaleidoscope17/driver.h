@@ -29,11 +29,11 @@ public:
   ~Driver() = default;
 
   Driver(std::istream& istrm, std::ostream& ostrm,
-         const bool debug_mode = false)
+         const bool debug_mode = false, const bool pass_enable = false)
     : istrm_{istrm.rdbuf()}
     , ostrm_{ostrm.rdbuf()}
     , parser_{istrm}
-    , core_{}
+    , core_{pass_enable}
     , codegen_visitor_{&core_}
     , print_visitor_{ostrm_}
     , debug_mode_{debug_mode} {};
@@ -107,6 +107,8 @@ public:
     if (!func_ptr) {
       EXCEPTION("failed to parse extern statement");
     }
+    auto handle = core_.jit->addModule(std::move(core_.module));
+    core_.init();
 
     print_debug_info(func_ptr, "parsed a top-level expr.");
   }

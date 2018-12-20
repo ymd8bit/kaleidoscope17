@@ -1,5 +1,6 @@
 import sys
 import subprocess
+import test_env as env
 
 
 def run_shell(cmd, cwd):
@@ -18,3 +19,9 @@ def run_shell(cmd, cwd):
             break
 
     return ''.join(buf).strip()
+
+
+def run_test(name, cmd, expect):
+    res = run_shell(cmd, env.BUILD_DIR)
+    assert res == expect, \
+        f'[{name}] failed...'

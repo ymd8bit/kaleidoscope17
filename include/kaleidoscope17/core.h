@@ -5,6 +5,7 @@
 #include <memory>
 #include <string>
 
+#include "kaleidoscope17/KaleidoscopeJIT.h" //  release 70
 #include "kaleidoscope17/utils.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
@@ -12,6 +13,7 @@
 #include "llvm/IR/LegacyPassManager.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
+#include "llvm/Support/TargetSelect.h"
 #include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Scalar/GVN.h"
@@ -22,21 +24,33 @@ struct Core
 {
   using Module = llvm::Module;
   using FunctionPassManager = llvm::legacy::FunctionPassManager;
+  using Jit = llvm::orc::KaleidoscopeJIT;
 
   llvm::LLVMContext context;
   llvm::IRBuilder<> builder;
   std::unique_ptr<Module> module;
   std::unique_ptr<FunctionPassManager> fpm;
   std::map<std::string, llvm::Value*> named_values;
+  std::unique_ptr<Jit> jit;
+  bool pass_enable;
 
-  Core()
+  Core(const bool _pass_enable = false)
     : context{}
     , builder{context}
     , module{std::make_unique<Module>("kaleidoscope17", context)}
     , fpm{std::make_unique<FunctionPassManager>(module.get())}
     , named_values{}
+    , pass_enable{_pass_enable}
   {
-    init_fpm();
+    llvm::InitializeNativeTarget();
+    llvm::InitializeNativeTargetAsmPrinter();
+    llvm::InitializeNativeTargetAsmParser();
+
+    jit = std::make_unique<Jit>();
+
+    if (pass_enable) {
+      init_fpm();
+    }
   }
 
   llvm::Value* get_value(const std::string& name)
@@ -59,7 +73,18 @@ struct Core
 
   void apply_passes(llvm::Function* func) { fpm->run(*func); }
 
+  void init()
+  {
+    init_module();
+    init_fpm();
+  }
+
 private:
+  void init_module()
+  {
+    module->setDataLayout(jit->getTargetMachine().createDataLayout());
+  }
+
   void init_fpm()
   {
     // Do simple "peephole" optimizations and bit-twiddling optimizations.

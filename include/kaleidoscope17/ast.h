@@ -120,8 +120,6 @@ public:
 
   inline const auto &proto() const { return *(proto_.get()); }
   inline const auto &body() const { return *(body_.get()); }
-  // inline auto &proto_unsafe() const { return *(proto_.get()); }
-  // inline auto &body_unsafe() const { return *(body_.get()); }
 };
 
 } // namespace kaleidoscope17
